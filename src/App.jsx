@@ -13,23 +13,26 @@ const App = () => {
   const [page, setPage] = useState(1);
   const [photos, setPhotos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!query) return;
       try {
-        setError(false);
+        setError(null);
         setIsLoading(true);
         const data = await getPhotos(query, page);
+        if (data.results.length === 0) {
+          throw new Error('No results found');
+        }
         setPhotos(prev => [...prev, ...data.results]);
       } catch (e) {
-        setError(true);
+        setError(e);
       } finally {
         setIsLoading(false);
       }
     };
-    query && fetchData();
+    fetchData();
   }, [page, query]);
 
   const handleSearch = searchQuery => {
@@ -39,17 +42,18 @@ const App = () => {
   };
 
   const handleLoadMore = async () => {
-    setPage(page + 1);
+    setPage(prevPage => prevPage + 1);
   };
 
   return (
     <>
       <SearchBar onSearch={handleSearch} />
-      <ErrorMessage />
-      <ImageGallery />
-      <Loader />
-      <ErrorMessage />
-      <LoadMoreBtn onClick={handleLoadMore} />
+      {error && <ErrorMessage message={error.message} />}
+      <ImageGallery images={photos} />
+      {isLoading && <Loader />}
+      {photos.length > 0 && !isLoading && (
+        <LoadMoreBtn onClick={handleLoadMore} />
+      )}
       <ImageModal />
     </>
   );
