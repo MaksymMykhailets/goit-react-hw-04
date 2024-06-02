@@ -14,6 +14,7 @@ const App = () => {
   const [photos, setPhotos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,6 +36,18 @@ const App = () => {
     fetchData();
   }, [page, query]);
 
+  useEffect(() => {
+    if (selectedImage) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedImage]);
+
   const handleSearch = searchQuery => {
     setQuery(searchQuery);
     setPhotos([]);
@@ -45,16 +58,26 @@ const App = () => {
     setPage(prevPage => prevPage + 1);
   };
 
+  const openModal = image => {
+    setSelectedImage(image);
+  };
+
+  const closeModal = () => {
+    setSelectedImage(null);
+  };
+
   return (
     <>
       <SearchBar onSearch={handleSearch} />
       {error && <ErrorMessage message={error.message} />}
-      <ImageGallery images={photos} />
+      <ImageGallery images={photos} onImageClick={openModal} />
       {isLoading && <Loader />}
       {photos.length > 0 && !isLoading && (
         <LoadMoreBtn onClick={handleLoadMore} />
       )}
-      <ImageModal />
+      {selectedImage && (
+        <ImageModal image={selectedImage} onClose={closeModal} />
+      )}
     </>
   );
 };
