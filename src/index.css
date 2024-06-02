@@ -2,7 +2,7 @@ html {
   scroll-behavior: smooth;
 }
 :root {
-  padding: 30px;
+  padding: 20px;
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   background-color: white;
   color: black;
